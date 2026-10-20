@@ -81,6 +81,31 @@ def bowl_cam(p, R, phase="in"):
     return FreeCam(c, target, near=20.0, far=R * 5, fog=R * 4.5)
 
 
+_shot_camera_v3 = r3.shot_camera
+
+
+def shot_camera4(kind, p, centers, rt=None, t=0.0):
+    hx, hy = centers["home"]
+    if kind == "descend4":
+        keys = [(0.0, 300, 1300, 16000, 32, 8), (0.55, -6400, 1800, 5200, 52, -70),
+                (0.80, -3800, 900, 2600, 54, -20), (1.0, hx, hy, 1500, 50, 40)]
+        for (p0, *k0), (p1, *k1) in zip(keys[:-1], keys[1:]):
+            if p <= p1:
+                q = r3.ease_io((p - p0) / (p1 - p0))
+                tx, ty = r3.lerp(k0[:2], k1[:2], q)
+                dist = math.exp(math.log(k0[2]) + (math.log(k1[2]) - math.log(k0[2])) * q)
+                return r3.Camera(tx, ty, dist, k0[3] + (k1[3] - k0[3]) * q, r3.lerp_angle(k0[4], k1[4], q))
+        return r3.Camera(hx, hy, 1500, 50, 40)
+    if kind == "ride_a":
+        return _shot_camera_v3("ride", p, centers, rt, t)
+    if kind == "pullback4":
+        return _shot_camera_v3("pullback", p, centers, rt, t)
+    return _shot_camera_v3(kind, p, centers, rt, t)
+
+
+r3.shot_camera = shot_camera4
+
+
 class Renderer4(r3.Renderer):
     def __init__(self):
         super().__init__()
