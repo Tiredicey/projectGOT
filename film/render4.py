@@ -65,14 +65,14 @@ def bowl_cam(p, R, phase="in"):
     centre = np.array([cx, cy, R])
     if phase == "in":
         az = math.radians(205 + 50 * p)
-        back = R * (0.62 - 0.22 * p)
-        lift = R * (0.18 - 0.10 * p)
-        look_el = -0.62 + 0.22 * p
+        back = R * (0.80 - 0.18 * p)
+        lift = R * (0.30 - 0.12 * p)
+        look_el = -0.48 + 0.10 * p
     else:
         az = math.radians(255 + 50 * p)
-        back = R * (0.40 + 0.25 * p)
-        lift = R * (0.08 + 0.12 * p)
-        look_el = -0.40 - 0.20 * p
+        back = R * (0.62 + 0.22 * p)
+        lift = R * (0.18 + 0.14 * p)
+        look_el = -0.40 - 0.10 * p
     fwd = np.array([math.cos(az), math.sin(az), 0.0])
     c = centre - fwd * back + np.array([0.0, 0.0, lift])
     d = fwd + np.array([0.0, 0.0, look_el])
@@ -114,13 +114,13 @@ class Renderer4(r3.Renderer):
             p["use_tex"].value = 1
             p["tex_dim"].value = 1.0
             p["spec"].value = 0.8
-            p["emis"].value = 0.25
+            p["emis"].value = 0.12
             vao.render()
         p["M"].write(gl3d.m4(mc.T(*centre) @ mc.S(size * 0.95) @ gl3d.rot_z(t * 0.12)))
         p["use_tex"].value = 0
         p["base"].value = (0.95, 0.72, 0.30)
         p["spec"].value = 1.2
-        p["emis"].value = 1.6
+        p["emis"].value = 0.55
         sc.vao_sun.render()
         p["emis"].value = 0.0
 
