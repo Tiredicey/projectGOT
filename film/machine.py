@@ -267,7 +267,7 @@ class Panel:
         ok, fr = self.cap.read()
         if ok:
             fr = cv2.resize(fr, self.size, interpolation=cv2.INTER_AREA)
-            self.img = np.ascontiguousarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB)[::-1])
+            self.img = np.ascontiguousarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
         self.last = idx
         return self.img, True
 
