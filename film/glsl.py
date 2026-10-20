@@ -1,3 +1,5 @@
+STATE = {"bend": (0.0, 0.0, 0.0, 0.0), "sunp": (0.0, 0.0, 0.0, 0.0)}
+
 BEND = """
 uniform vec4 bend;
 vec3 bendp(vec3 p) {

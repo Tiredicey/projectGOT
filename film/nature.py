@@ -7,6 +7,7 @@ from shapely.geometry import Polygon
 
 import geo
 import landcover
+from glsl import BEND, SUNLIGHT, STATE
 
 TILE = 600.0
 
@@ -24,6 +25,7 @@ out vec3 w;
 out vec3 n;
 out float k;
 out float var;
+""" + BEND + """
 void main() {
     float h = i_pos.z;
     float a = i_pos.w;
@@ -35,10 +37,11 @@ void main() {
                + sin(t * 3.1 + i_pos.y * 0.05) * 0.25);
     p.x += sway * h * 0.04;
     p.y += sway * h * 0.025;
-    w = vec3(i_pos.xy, i_var.x) + p;
+    vec3 wu = vec3(i_pos.xy, i_var.x) + p;
     vec3 nn = in_n;
     nn.xy = vec2(ca * nn.x - sa * nn.y, sa * nn.x + ca * nn.y);
-    n = nn;
+    n = bendn(wu, nn);
+    w = bendp(wu);
     k = in_k;
     var = i_var.y;
     gl_Position = VP * vec4(w, 1.0);
@@ -52,7 +55,8 @@ in vec3 n;
 in float k;
 in float var;
 out vec4 frag;
-uniform vec3 L;
+uniform vec3 Lsun;
+""" + SUNLIGHT + """
 uniform vec3 leaf_a;
 uniform vec3 leaf_b;
 uniform vec3 trunk;
@@ -76,6 +80,7 @@ float shadow_at(vec3 p, vec3 nn) {
 }
 float hash3(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
 void main() {
+    vec3 L = light_dir(w, Lsun);
     vec3 nn = normalize(n);
     float sh = shadow_at(w, nn);
     float diff = max(dot(nn, L), 0.0);
@@ -106,9 +111,13 @@ in float in_z;
 in float in_shore;
 out vec3 w;
 out float shore;
+out vec3 upv;
+""" + BEND + """
 void main() {
     float z = in_z + 0.35 * sin(in_xy.x * 0.011 + t * 1.3) + 0.25 * sin(in_xy.y * 0.017 - t * 1.1);
-    w = vec3(in_xy, z);
+    vec3 wu = vec3(in_xy, z);
+    upv = bendn(wu, vec3(0.0, 0.0, 1.0));
+    w = bendp(wu);
     shore = in_shore;
     gl_Position = VP * vec4(w, 1.0);
 }
@@ -118,9 +127,12 @@ WATER_FS = """
 #version 330
 in vec3 w;
 in float shore;
+in vec3 upv;
 out vec4 frag;
 uniform float t;
-uniform vec3 L;
+uniform vec4 bend;
+uniform vec3 Lsun;
+""" + SUNLIGHT + """
 uniform vec3 cam;
 uniform float fog_dist;
 uniform vec3 haze;
@@ -149,6 +161,7 @@ vec2 wave_grad(vec2 p, float fp) {
     return g;
 }
 void main() {
+    vec3 L = light_dir(w, Lsun);
     vec3 dx = dFdx(w), dy = dFdy(w);
     vec3 v0 = normalize(cam - w);
     float graze = 1.0 - clamp(v0.z, 0.0, 1.0);
@@ -157,6 +170,7 @@ void main() {
     fp = max(fp, smoothstep(2500.0, 6000.0, dist) * 40.0);
     vec2 g = wave_grad(w.xy, fp);
     vec3 nn = normalize(vec3(-g, 1.0));
+    if (bend.w > 0.0) nn = normalize(upv + vec3(-g, 0.0) * 0.6);
     vec3 v = normalize(cam - w);
     float fres = 0.04 + 0.96 * pow(1.0 - max(dot(nn, v), 0.0), 5.0);
     vec3 deep = vec3(0.07, 0.30, 0.42);
@@ -413,7 +427,8 @@ class Nature:
             if k in prog:
                 prog[k].write(m4(LVP))
         for k, v in (("cam", tuple(cam)), ("fog_dist", fog_dist), ("haze", haze), ("use_shadow", use_shadow),
-                     ("L", tuple(L)), ("t", t)):
+                     ("L", tuple(L)), ("Lsun", tuple(L)), ("t", t), ("bend", STATE["bend"]),
+                     ("sunp", STATE["sunp"])):
             if k in prog:
                 prog[k].value = v
 

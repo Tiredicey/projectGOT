@@ -8,6 +8,7 @@ from shapely.geometry import Polygon
 import geo
 import landcover
 import nature
+from glsl import BEND, SUNLIGHT, STATE
 from timeline import H, LAND, LEAD, W
 
 FPX = 0.5 * W / math.tan(math.radians(40) / 2)
@@ -61,10 +62,11 @@ in vec3 in_pos;
 in vec3 in_n;
 out vec3 w;
 out vec3 n;
+""" + BEND + """
 void main() {
-    w = in_pos;
-    n = in_n;
-    gl_Position = VP * vec4(in_pos, 1.0);
+    w = bendp(in_pos);
+    n = bendn(in_pos, in_n);
+    gl_Position = VP * vec4(w, 1.0);
 }
 """
 
@@ -76,7 +78,8 @@ out vec4 frag;
 uniform sampler2D t0, t1, t2, t3;
 uniform vec4 r0, r1, r2, r3;
 uniform float f0, f1, f2, f3;
-uniform vec3 L;
+uniform vec3 Lsun;
+""" + SUNLIGHT + """
 """ + SHADOW_GLSL + FOG_GLSL + """
 vec4 lay(sampler2D t, vec4 r, float f) {
     vec2 uv = vec2((w.x - r.x) / (r.y - r.x), (r.w - w.y) / (r.w - r.z));
@@ -86,6 +89,7 @@ vec4 lay(sampler2D t, vec4 r, float f) {
     return vec4(texture(t, uv).rgb, a);
 }
 void main() {
+    vec3 L = light_dir(w, Lsun);
     vec3 c = haze;
     vec4 l = lay(t0, r0, f0); c = mix(c, l.rgb, l.a);
     l = lay(t1, r1, f1); c = mix(c, l.rgb, l.a);
@@ -119,12 +123,13 @@ out vec3 roof;
 out float hf;
 out vec2 uv;
 out float hh;
-""" + SPRING_GLSL + """
+""" + SPRING_GLSL + BEND + """
 void main() {
     float k = spring(t - in_start);
     float z = in_pos.z - 3.0 + in_hf * (3.0 + in_h) * k;
-    w = vec3(in_pos.xy, z);
-    n = in_n;
+    vec3 wu = vec3(in_pos.xy, z);
+    n = bendn(wu, in_n);
+    w = bendp(wu);
     col = in_col;
     roof = in_roof;
     hf = in_hf;
@@ -144,10 +149,12 @@ in float hf;
 in vec2 uv;
 in float hh;
 out vec4 frag;
-uniform vec3 L;
+uniform vec3 Lsun;
+""" + SUNLIGHT + """
 """ + SHADOW_GLSL + FOG_GLSL + """
 float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 void main() {
+    vec3 L = light_dir(w, Lsun);
     vec3 nn = normalize(n);
     float sh = shadow_at(w, nn);
     float diff = max(dot(nn, L), 0.0);
@@ -193,6 +200,7 @@ ROUTE_VS = """
 uniform mat4 VP;
 uniform vec3 cam;
 uniform float width;
+""" + BEND + """
 in vec3 in_pos;
 in vec2 in_side;
 in float in_s;
@@ -202,6 +210,7 @@ void main() {
     vec3 p = in_pos + vec3(in_side * width, 0.0);
     vec3 toc = normalize(cam - p);
     p += toc * width * 1.5;
+    p = bendp(p);
     s = in_s;
     across = sign(in_side.x + in_side.y * 0.0001) * length(in_side);
     gl_Position = VP * vec4(p, 1.0);
@@ -241,10 +250,11 @@ in vec3 in_pos;
 in vec3 in_n;
 out vec3 w;
 out vec3 n;
+""" + BEND + """
 void main() {
-    w = in_pos;
-    n = in_n;
-    gl_Position = VP * vec4(in_pos, 1.0);
+    w = bendp(in_pos);
+    n = bendn(in_pos, in_n);
+    gl_Position = VP * vec4(w, 1.0);
 }
 """
 
@@ -253,11 +263,13 @@ SLAB_FS = """
 in vec3 w;
 in vec3 n;
 out vec4 frag;
-uniform vec3 L;
+uniform vec3 Lsun;
+""" + SUNLIGHT + """
 uniform float top_z;
 """ + FOG_GLSL + """
 float hash(float x) { return fract(sin(x * 127.1) * 43758.5453); }
 void main() {
+    vec3 L = light_dir(w, Lsun);
     float along = w.x + w.y;
     float wav = sin(along * 0.0021) * 22.0 + sin(along * 0.0057 + 1.3) * 9.0;
     float d = (w.z + wav) / 38.0;
@@ -283,10 +295,11 @@ in vec2 in_uv;
 out vec3 w;
 out vec3 n;
 out vec2 uv;
+""" + BEND + """
 void main() {
     vec4 p = M * vec4(in_pos, 1.0);
-    w = p.xyz;
-    n = mat3(M) * in_n;
+    w = bendp(p.xyz);
+    n = bendn(p.xyz, mat3(M) * in_n);
     uv = in_uv;
     gl_Position = VP * p;
 }
@@ -298,15 +311,18 @@ in vec3 w;
 in vec3 n;
 in vec2 uv;
 out vec4 frag;
-uniform vec3 L;
+uniform vec3 Lsun;
+""" + SUNLIGHT + """
 uniform vec3 base;
 uniform int use_tex;
 uniform sampler2D tex;
 uniform float tex_dim;
 uniform float spec;
 uniform int use_fog;
+uniform float emis;
 """ + SHADOW_GLSL + FOG_GLSL + """
 void main() {
+    vec3 L = light_dir(w, Lsun);
     vec3 nn = normalize(n);
     vec3 v = normalize(cam - w);
     if (dot(nn, v) < 0.0) nn = -nn;
@@ -318,6 +334,7 @@ void main() {
     float rim = pow(1.0 - max(dot(nn, v), 0.0), 3.0);
     float hemi = 0.5 + 0.5 * nn.y;
     vec3 c = alb * (0.22 + 0.18 * hemi + 0.85 * diff * sh) + vec3(1.0, 0.85, 0.55) * sp + alb * rim * 0.35;
+    c += alb * emis;
     if (use_fog == 1) c = fog(c, w);
     frag = vec4(c, 1.0);
 }
@@ -654,7 +671,8 @@ class Scene:
             if k in prog:
                 prog[k].write(v)
         for k, v in (("cam", tuple(cam)), ("fog_dist", fog_dist), ("haze", HAZE), ("use_shadow", use_shadow),
-                     ("L", tuple(L))):
+                     ("L", tuple(L)), ("Lsun", tuple(L)), ("bend", STATE["bend"]), ("sunp", STATE["sunp"]),
+                     ("emis", 0.0)):
             if k in prog:
                 prog[k].value = v
 
