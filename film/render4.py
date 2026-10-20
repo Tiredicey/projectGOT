@@ -112,8 +112,68 @@ class Renderer4(r3.Renderer):
         self.chamber = chamber.Chamber(self.scene.ctx, self.scene.fbo_ms, self.scene.read)
         self.panels = {k: mc.Panel(str(KANAL / f"{k}.mp4")) for k in tl.PANELS}
         self.astro_on = False
-        self.scene.extra = self.draw_astro
+        self.scene.extra = self.draw_extra
         self.astro_t = 0.0
+        sc = self.scene
+        self.mvao = {k: sc.obj_vao(v) for k, v in (("g12", mc.gear(12)), ("g24", mc.gear(24)), ("g48", mc.gear(48, spokes=6)),
+                                                    ("cyl", mc.cylinder()), ("ring", mc.ring_gear(60)))}
+
+    def draw_extra(self, VP, LVP, c, fog_dist, t):
+        self.draw_astro(VP, LVP, c, fog_dist, t)
+        if glsl.STATE["bend"][3] > 0.0:
+            return
+        self.draw_machines(VP, LVP, c, fog_dist, t)
+
+    def draw_machines(self, VP, LVP, c, fog_dist, t):
+        sc = self.scene
+        p = sc.p_obj
+        p["use_tex"].value = 0
+        p["use_fog"].value = 1
+        p["emis"].value = 0.0
+        for hr in sc.heroes:
+            tau = t - hr["start"]
+            k = r3.spring(tau)
+            if k <= 0.01 or np.linalg.norm(c[:2] - hr["c"]) > 3500:
+                continue
+            cx, cy = hr["c"]
+            z0 = hr["z"]
+            R = hr["r"]
+            spin = tau * 1.4
+            rise = min(1.0, k)
+            ring_r = R * 1.08
+            p["base"].value = (0.46, 0.32, 0.14)
+            p["spec"].value = 0.6
+            p["M"].write(gl3d.m4(mc.T(cx, cy, z0 + 0.4) @ mc.rot((0, 0, 1), -spin * 0.18) @ mc.S(ring_r, ring_r, 3.0 * rise)))
+            self.mvao["ring"].render()
+            ns, npl = 12, 24
+            sun_r = ring_r * ns / (ns + 2 * npl)
+            pl_r = ring_r * npl / (ns + 2 * npl)
+            carrier = spin * 0.3
+            for kk in range(3):
+                a = carrier + kk * 2 * math.pi / 3
+                gx, gy = cx + math.cos(a) * (sun_r + pl_r) * 0.0, cy
+            for j, (teeth, rad, ang_off) in enumerate(((48, R * 0.55, 0.0), (24, R * 0.28, 1.0), (12, R * 0.14, 2.0))):
+                a = math.radians(35 + 120 * j) + 0.0
+                d = ring_r + rad * 1.02 + (R * 0.08 if j else 0)
+                gx, gy = cx + math.cos(a) * d, cy + math.sin(a) * d
+                ratio = 48.0 / teeth
+                th = (-1) ** j * spin * ratio * 0.18
+                p["base"].value = (0.70, 0.50, 0.22) if j != 1 else (0.66, 0.36, 0.20)
+                p["spec"].value = 1.0
+                p["M"].write(gl3d.m4(mc.T(gx, gy, z0 + 1.0 + 4.0 * rise) @ mc.rot((0, 0, 1), th) @ mc.S(rad, rad, 2.2)))
+                self.mvao[{48: "g48", 24: "g24", 12: "g12"}[teeth]].render()
+                p["base"].value = (0.42, 0.42, 0.40)
+                p["M"].write(gl3d.m4(mc.T(gx, gy, z0 - 2.0) @ mc.S(rad * 0.12, rad * 0.12, 6.0 + 4.0 * rise)))
+                self.mvao["cyl"].render()
+            hgt = max(6.0, hr.get("h", 12.0))
+            for kk in range(4):
+                a = math.radians(45 + 90 * kk) + spin * 0.05
+                px, py = cx + math.cos(a) * R * 0.95, cy + math.sin(a) * R * 0.95
+                for off, seg, rr in mc.telescope(hgt * 1.15, rise, 3):
+                    p["base"].value = (0.70, 0.50, 0.22) if rr > 0.9 else (0.48, 0.47, 0.44)
+                    p["spec"].value = 1.2
+                    p["M"].write(gl3d.m4(mc.T(px, py, z0 + off) @ mc.S(R * 0.05 * rr, R * 0.05 * rr, seg)))
+                    self.mvao["cyl"].render()
 
     def draw_astro(self, VP, LVP, c, fog_dist, t):
         if not self.astro_on:
