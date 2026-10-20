@@ -1,0 +1,51 @@
+{
+ "file": "out/lipa_map_sequence_1080p24.mp4",
+ "sha256": "078150c0700876a4334cc0c73ebdca263ba70aba939975a1c6ab9405f633052e",
+ "probe": {
+  "programs": [],
+  "stream_groups": [],
+  "streams": [
+   {
+    "codec_name": "h264",
+    "codec_type": "video",
+    "width": 1920,
+    "height": 1080,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "24/1",
+    "nb_frames": "2520"
+   },
+   {
+    "codec_name": "mp3",
+    "codec_type": "audio",
+    "sample_rate": "44100",
+    "channels": 2,
+    "r_frame_rate": "0/0",
+    "nb_frames": "3895"
+   }
+  ],
+  "format": {
+   "duration": "105.000000",
+   "bit_rate": "29929212"
+  }
+ },
+ "scene_cuts_gt0.3": [
+  3.416667,
+  8.708333,
+  43.75,
+  49.041667,
+  64.958333,
+  84.083333
+ ],
+ "cuts_per_minute": 3.43,
+ "near_still_share": 0.0,
+ "mean_frame_diff": 9.834,
+ "general_flashes_max_per_second": 0,
+ "loudness": {
+  "integrated_lufs": -15.7,
+  "lra_lu": 3.3,
+  "true_peak_dbtp": -2.8
+ },
+ "audio_md5": "MD5=cb2e03682f159d1661ff40d6801560b5",
+ "tempo_bpm_librosa": 172.27,
+ "onset_count": 351
+}
