@@ -677,6 +677,13 @@ class Scene:
                 prog[k].value = v
 
     def map_matrices(self, cam):
+        if getattr(cam, "free", False):
+            V = look(cam.c, cam.R[0], cam.R[1], cam.R[2])
+            P = perspective(cam.near, cam.far)
+            jx, jy = getattr(self, "jitter", (0.0, 0.0))
+            P[0, 2] += jx
+            P[1, 2] += jy
+            return P @ V, np.eye(4), cam.c
         target_z = float(self.terrain.sample(cam.t[0], cam.t[1], smooth=True))
         c = cam.c + np.array([0, 0, target_z])
         ground = float(self.terrain.sample(c[0], c[1], smooth=True))
@@ -714,9 +721,10 @@ class Scene:
     def render_map(self, cam, t, k_fn):
         ctx = self.ctx
         VP, LVP, c = self.map_matrices(cam)
-        fog_dist = cam.dist * 3.4 + 2500
+        fog_dist = getattr(cam, "fog", cam.dist * 3.4 + 2500)
         ctx.enable(moderngl.DEPTH_TEST)
         ctx.disable(moderngl.CULL_FACE)
+        shadows = 0 if getattr(cam, "free", False) else 1
         self.shadow_fbo.use()
         self.shadow_fbo.clear(depth=1.0)
         ctx.polygon_offset = (2.0, 4.0)
@@ -724,9 +732,10 @@ class Scene:
         for prog in (self.p_terrain, self.p_city, self.p_obj):
             self.set_common(prog, LVP, LVP, c, fog_dist, 0, SUN_DIR)
         self.p_city["t"].value = t
-        self.vao_city.render()
-        self.draw_gears(t, k_fn)
-        self.nature.draw_trees(LVP, LVP, c, cam.t, cam.dist, fog_dist, 0, SUN_DIR, HAZE, t, shadow_pass=True)
+        if shadows:
+            self.vao_city.render()
+            self.draw_gears(t, k_fn)
+            self.nature.draw_trees(LVP, LVP, c, cam.t, cam.dist, fog_dist, 0, SUN_DIR, HAZE, t, shadow_pass=True)
         ctx.polygon_offset = (0.0, 0.0)
         self.fbo_ms.use()
         void = 1.0 - min(1.0, max(0.0, (cam.dist - 9000.0) / 12000.0))
@@ -734,7 +743,7 @@ class Scene:
         self.fbo_ms.clear(*bg, 1.0, depth=1.0)
         self.bind_textures(True)
         for prog in (self.p_terrain, self.p_city, self.p_obj):
-            self.set_common(prog, VP, LVP, c, fog_dist, 1, SUN_DIR)
+            self.set_common(prog, VP, LVP, c, fog_dist, shadows, SUN_DIR)
         self.vao_terrain.render()
         if STATE["bend"][3] <= 0.0:
             self.set_common(self.p_slab, VP, LVP, c, fog_dist, 0, SUN_DIR)
@@ -743,9 +752,12 @@ class Scene:
         self.p_city["t"].value = t
         self.vao_city.render()
         self.draw_gears(t, k_fn)
-        self.nature.draw_trees(VP, LVP, c, cam.t, cam.dist, fog_dist, 1, SUN_DIR, HAZE, t)
-        self.nature.draw_water(VP, LVP, c, fog_dist, 1, SUN_DIR, HAZE, t)
+        self.nature.draw_trees(VP, LVP, c, cam.t, cam.dist, fog_dist, shadows, SUN_DIR, HAZE, t)
+        self.nature.draw_water(VP, LVP, c, fog_dist, shadows, SUN_DIR, HAZE, t)
         self.draw_route(VP, c, cam.dist, self.route_progress, t)
+        extra = getattr(self, "extra", None)
+        if extra is not None:
+            extra(VP, LVP, c, fog_dist, t)
         self.VP = VP
         return self.read(4)[..., :3]
 
