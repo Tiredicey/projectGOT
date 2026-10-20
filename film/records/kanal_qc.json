@@ -1,0 +1,44 @@
+{
+ "kanal_01_tabo.mp4": {
+  "frames": 240,
+  "flashes_max_per_s": 0,
+  "scene_cuts": [],
+  "mean_luma": 0.04,
+  "mean_frame_diff": 3.25
+ },
+ "kanal_02_jeepney.mp4": {
+  "frames": 240,
+  "flashes_max_per_s": 0,
+  "scene_cuts": [],
+  "mean_luma": 0.077,
+  "mean_frame_diff": 5.54
+ },
+ "kanal_03_tricycle.mp4": {
+  "frames": 240,
+  "flashes_max_per_s": 0,
+  "scene_cuts": [],
+  "mean_luma": 0.129,
+  "mean_frame_diff": 6.0
+ },
+ "kanal_04_sarisari.mp4": {
+  "frames": 240,
+  "flashes_max_per_s": 0,
+  "scene_cuts": [],
+  "mean_luma": 0.062,
+  "mean_frame_diff": 4.72
+ },
+ "kanal_05_rooster.mp4": {
+  "frames": 240,
+  "flashes_max_per_s": 0,
+  "scene_cuts": [],
+  "mean_luma": 0.032,
+  "mean_frame_diff": 3.42
+ },
+ "kanal_06_videoke.mp4": {
+  "frames": 240,
+  "flashes_max_per_s": 0,
+  "scene_cuts": [],
+  "mean_luma": 0.104,
+  "mean_frame_diff": 6.74
+ }
+}

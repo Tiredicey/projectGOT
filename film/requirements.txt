@@ -1,0 +1,9 @@
+moderngl==5.12.0
+glcontext
+networkx
+numpy
+opencv-python-headless
+shapely
+pillow
+scipy
+librosa

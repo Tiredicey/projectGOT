@@ -1,0 +1,61 @@
+{
+ "file": "build/refs/refA_GoT.mp4",
+ "sha256": "efdc14a638f7d2a1c886dfd28518effc0ed22a1110f1ddf99d966a47ca4fd2f0",
+ "probe": {
+  "programs": [],
+  "stream_groups": [],
+  "streams": [
+   {
+    "codec_name": "h264",
+    "codec_type": "video",
+    "width": 1920,
+    "height": 1078,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "24000/1001",
+    "nb_frames": "2646"
+   },
+   {
+    "codec_name": "aac",
+    "codec_type": "audio",
+    "sample_rate": "44100",
+    "channels": 2,
+    "r_frame_rate": "0/0",
+    "nb_frames": "4756"
+   }
+  ],
+  "format": {
+   "duration": "110.434104",
+   "bit_rate": "4346487"
+  }
+ },
+ "scene_cuts_gt0.3": [
+  6.006,
+  8.717042,
+  15.849167,
+  15.974292,
+  39.28925,
+  40.623917,
+  42.333958,
+  49.79975,
+  53.470083,
+  53.720333,
+  57.80775,
+  57.932875,
+  58.016292,
+  79.079,
+  98.5985,
+  106.689917
+ ],
+ "cuts_per_minute": 8.69,
+ "near_still_share": 0.042,
+ "mean_frame_diff": 9.048,
+ "general_flashes_max_per_second": 4,
+ "loudness": {
+  "integrated_lufs": -26.1,
+  "lra_lu": 2.6,
+  "true_peak_dbtp": -11.0
+ },
+ "audio_md5": "MD5=c14432c9ddbeefe3c30fc7f15c155fd4",
+ "tempo_bpm_librosa": 172.27,
+ "onset_count": 167
+}

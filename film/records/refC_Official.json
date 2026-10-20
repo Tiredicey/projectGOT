@@ -1,0 +1,54 @@
+{
+ "file": "build/refs/refC_Official.mp4",
+ "sha256": "942d1ee503acb9a2309260bb2f2c7fddc12768667aa61319fa14fe286a86f21c",
+ "probe": {
+  "programs": [],
+  "stream_groups": [],
+  "streams": [
+   {
+    "codec_name": "h264",
+    "codec_type": "video",
+    "width": 1280,
+    "height": 720,
+    "pix_fmt": "yuv420p",
+    "r_frame_rate": "30000/1001",
+    "nb_frames": "3044"
+   },
+   {
+    "codec_name": "aac",
+    "codec_type": "audio",
+    "sample_rate": "44100",
+    "channels": 2,
+    "r_frame_rate": "0/0",
+    "nb_frames": "4380"
+   }
+  ],
+  "format": {
+   "duration": "101.703401",
+   "bit_rate": "888165"
+  }
+ },
+ "scene_cuts_gt0.3": [
+  1.1011,
+  11.778433,
+  11.8118,
+  12.579233,
+  43.309933,
+  45.478767,
+  63.6636,
+  84.818067,
+  93.860433
+ ],
+ "cuts_per_minute": 5.31,
+ "near_still_share": 0.092,
+ "mean_frame_diff": 5.822,
+ "general_flashes_max_per_second": 2,
+ "loudness": {
+  "integrated_lufs": -15.4,
+  "lra_lu": 3.3,
+  "true_peak_dbtp": -2.6
+ },
+ "audio_md5": "MD5=ae653ebe09e797c9fe2462868d133355",
+ "tempo_bpm_librosa": 172.27,
+ "onset_count": 351
+}
