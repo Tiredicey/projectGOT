@@ -109,8 +109,9 @@ class Odometer:
         e = min(1.0, max(0.0, lt / dur))
         pitch = 2.3
         width = pitch * len(cols)
-        orbit = math.radians(-18 + 30 * e)
-        dist = (width + 7.0) / 0.70 - 2.5 * e
+        q = 1 - (1 - e) ** 3
+        orbit = math.radians(-34 + 44 * q + (seed % 2) * 8)
+        dist = (width + 7.0) / 0.70 * (1.55 - 0.55 * q)
         target = np.array([0.0, 0.0, -1.0])
         cam = target + np.array([math.sin(orbit) * dist, -math.cos(orbit) * dist, 2.6 - 1.2 * e])
         f = target - cam
