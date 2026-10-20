@@ -17,7 +17,7 @@ vec3 bendn(vec3 p, vec3 n) {
     if (r < 1e-3) return n;
     vec2 u = d / r;
     float th = min(r / bend.w, 3.0);
-    vec3 a = vec3(-u.y, u.x, 0.0);
+    vec3 a = vec3(u.y, -u.x, 0.0);
     float c = cos(th), s = sin(th);
     return n * c + cross(a, n) * s + a * dot(a, n) * (1.0 - c);
 }
