@@ -11,8 +11,11 @@ Copyrighted media is never committed (see .gitignore).
 - GOAL: v4 film, 1:42-1:50, 1920x1080: brass gear-train machines, hollow-sphere map around an astrolabe sun,
   one continuous macro dive into machine chambers, 1:1 Lipa landmarks, kanal-humour automaton panels,
   supplied song bit-exact.
-- DONE: v3 shipped (see film/CHUNKS.md); M1 table for 3 refs + v3 (film/records/m1_table.md);
-  kanal clips QC'd (film/records/kanal_qc.json); landmark geometry checked against OSM.
-- OPEN: v4 renderer (sphere warp, gear trains, chambers, landmark models, panels), render, mux, measure.
+- DONE: v3 shipped (film/CHUNKS.md); M1 table (film/records/m1_table.md); kanal QC (film/records/kanal_qc.json);
+  film/machine.py (mesh kit), film/glsl.py (sphere bend + central sun), film/timeline4.py (bar-locked v4 shots),
+  film/chamber.py (automaton chamber: iris shutter, frame, gear train, planetary set, telescopes; 0.37 s/frame).
+  Bend wired into every shader; bend off is pixel-identical to v3 (checked frames 372 and 960).
+- OPEN: render4.py (shot cameras for hollow/descend4/pullback4/hollow_out using the bend; astrolabe sun at the
+  sphere centre; chamber shots; landmark detail models), stills review, chunked render, mux, measure, README.
 - BLOCKED: none.
-- NEXT: implement film/machine.py (gear trains + chambers) and the sphere warp in gl3d.py, render stills.
+- NEXT: write film/render4.py; probes in film/tools/ (bend_probe.py, chamber_probe.py) show the current look.

@@ -736,9 +736,10 @@ class Scene:
         for prog in (self.p_terrain, self.p_city, self.p_obj):
             self.set_common(prog, VP, LVP, c, fog_dist, 1, SUN_DIR)
         self.vao_terrain.render()
-        self.set_common(self.p_slab, VP, LVP, c, fog_dist, 0, SUN_DIR)
-        self.p_slab["top_z"].value = self.slab_top
-        self.vao_slab.render()
+        if STATE["bend"][3] <= 0.0:
+            self.set_common(self.p_slab, VP, LVP, c, fog_dist, 0, SUN_DIR)
+            self.p_slab["top_z"].value = self.slab_top
+            self.vao_slab.render()
         self.p_city["t"].value = t
         self.vao_city.render()
         self.draw_gears(t, k_fn)
