@@ -12,6 +12,7 @@ import chamber
 import gl3d
 import glsl
 import machine as mc
+import odometer
 import render as r3
 import route
 import timeline
@@ -110,7 +111,7 @@ class Renderer4(r3.Renderer):
     def __init__(self):
         super().__init__()
         self.chamber = chamber.Chamber(self.scene.ctx, self.scene.fbo_ms, self.scene.read)
-        self.panels = {k: mc.Panel(str(KANAL / f"{k}.mp4")) for k in tl.PANELS}
+        self.odo = odometer.Odometer(self.scene.ctx, self.scene.fbo_ms, self.scene.read, self.chamber)
         self.astro_on = False
         self.scene.extra = self.draw_extra
         self.astro_t = 0.0
@@ -231,14 +232,15 @@ class Renderer4(r3.Renderer):
         return img
 
     def chamber_frame(self, t, b0, b1, key):
-        lt = t - b0
-        pan = self.panels[key]
-        src_len = pan.n / FPS if pan.n else 10.0
-        start = max(0.0, (src_len - (b1 - b0)) * 0.5)
-        idx = int(round((start + lt) * FPS))
-        img, _ = pan.frame(idx)
-        seed = list(tl.PANELS).index(key) + 1
-        return self.chamber.render(t, lt, img, seed, ease_io(lt / (b1 - b0)))
+        nsub = max(1, self.spp)
+        acc = np.zeros((H, W, 3), np.float32)
+        for i in range(nsub):
+            jx, jy = r3.HALTON[i % len(r3.HALTON)]
+            self.odo.jitter = ((jx - 0.5) * 2.0 / W, (jy - 0.5) * 2.0 / H)
+            ts = min(max(t + ((i + 0.5) / nsub - 0.5) * 0.5 / FPS, b0), b1 - 1e-4)
+            acc += self.odo.render(ts, ts - b0, b1 - b0, key, list(tl.PANELS).index(key) + 1)
+        self.odo.jitter = (0.0, 0.0)
+        return np.clip(acc / nsub + 0.5, 0, 255).astype(np.uint8)
 
     def frame(self, n):
         t = n / FPS
