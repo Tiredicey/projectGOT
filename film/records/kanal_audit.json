@@ -1,0 +1,57 @@
+{
+ "date": "2026-10-20",
+ "method": "18 frames from the six chamber slots of the v4 render, viewed at 520 px (build/kanal_review_*.jpg), plus records/kanal_qc.json",
+ "findings": [
+  "Off-model: only kanal_01 matches the tito character sheet; 03 (thin humanoid robots), 04, 05 and 06 (bald robot heads, different faces) do not. COMPANION K47 / M8.A requires the same character in every shot.",
+  "Generic look: smooth AI-default sepia diorama with soft bokeh; 04/05/06 robot faces read as stock sci-fi, not the brief's tito.",
+  "Low exposure: mean linear luma 0.032-0.129; 01 and 05 are near-black inside the frame.",
+  "Little story-relevant motion at viewing size: the jeepney (02) is nearly static apart from smoke; the gag lands after the 5.3 s slot in 01 and 05.",
+  "Nothing in them is about Lipa: no landmark, no data, no place link."
+ ],
+ "decision": "Cut all six from v4 (K47: a generation is a draft until checked; failed shots are cut, never shipped). Files stay in uploaded_files only; nothing derived from them ships.",
+ "replacement": "Brass odometer chambers: 3D digit drums roll on the bar grid to real numbers computed from this project's own data, each with a source line.",
+ "qc_numbers": {
+  "kanal_01_tabo.mp4": {
+   "frames": 240,
+   "flashes_max_per_s": 0,
+   "scene_cuts": [],
+   "mean_luma": 0.04,
+   "mean_frame_diff": 3.25
+  },
+  "kanal_02_jeepney.mp4": {
+   "frames": 240,
+   "flashes_max_per_s": 0,
+   "scene_cuts": [],
+   "mean_luma": 0.077,
+   "mean_frame_diff": 5.54
+  },
+  "kanal_03_tricycle.mp4": {
+   "frames": 240,
+   "flashes_max_per_s": 0,
+   "scene_cuts": [],
+   "mean_luma": 0.129,
+   "mean_frame_diff": 6.0
+  },
+  "kanal_04_sarisari.mp4": {
+   "frames": 240,
+   "flashes_max_per_s": 0,
+   "scene_cuts": [],
+   "mean_luma": 0.062,
+   "mean_frame_diff": 4.72
+  },
+  "kanal_05_rooster.mp4": {
+   "frames": 240,
+   "flashes_max_per_s": 0,
+   "scene_cuts": [],
+   "mean_luma": 0.032,
+   "mean_frame_diff": 3.42
+  },
+  "kanal_06_videoke.mp4": {
+   "frames": 240,
+   "flashes_max_per_s": 0,
+   "scene_cuts": [],
+   "mean_luma": 0.104,
+   "mean_frame_diff": 6.74
+  }
+ }
+}
